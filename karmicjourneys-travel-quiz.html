@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Travel Mood | KarmicJourneys</title>
+<style>
+  :root{
+    --teal:#2a9d8f;
+    --teal-light:#e6f6f4;
+    --coral:#f4845f;
+    --purple:#8e7cc3;
+    --bg:#faf9f7;
+    --bubble-user:#2a9d8f;
+    --bubble-bot:#ffffff;
+    --text-dark:#2b2b2b;
+    --text-muted:#8a8a8a;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#fdf6f0 0%,#f4f8f7 100%);
+    color:var(--text-dark);
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .phone{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 0 40px rgba(0,0,0,0.08);
+  }
+  header{
+    padding:18px 20px 14px;
+    background:linear-gradient(135deg,var(--teal) 0%,#238176 100%);
+    color:white;
+    border-radius:0 0 20px 20px;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header .brand{
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.3px;
+    opacity:0.95;
+  }
+  header .title{
+    font-size:19px;
+    font-weight:700;
+    margin-top:2px;
+  }
+  .progress-wrap{
+    margin-top:12px;
+  }
+  .progress-label{
+    font-size:12px;
+    opacity:0.9;
+    margin-bottom:6px;
+  }
+  .progress-bar{
+    height:6px;
+    background:rgba(255,255,255,0.3);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:white;
+    border-radius:6px;
+    transition:width 0.4s ease;
+  }
+  .chat{
+    flex:1;
+    padding:20px 16px 100px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    overflow-y:auto;
+  }
+  .bubble-row{
+    display:flex;
+    animation:fadeIn 0.35s ease both;
+  }
+  @keyframes fadeIn{
+    from{opacity:0; transform:translateY(8px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .bubble-row.bot{justify-content:flex-start;}
+  .bubble-row.user{justify-content:flex-end;}
+  .bubble{
+    max-width:80%;
+    padding:12px 16px;
+    border-radius:var(--radius);
+    font-size:15px;
+    line-height:1.4;
+  }
+  .bubble.bot{
+    background:var(--bubble-bot);
+    border:1px solid #eee;
+    border-bottom-left-radius:4px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.03);
+  }
+  .bubble.user{
+    background:var(--bubble-user);
+    color:white;
+    border-bottom-right-radius:4px;
+  }
+  .bubble.reaction{
+    background:var(--teal-light);
+    color:#1d6d63;
+    font-weight:600;
+    border-bottom-left-radius:4px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:4px;
+    animation:fadeIn 0.4s ease both;
+  }
+  .option-btn{
+    background:white;
+    border:1.5px solid var(--teal);
+    color:var(--teal);
+    padding:12px 16px;
+    border-radius:14px;
+    font-size:14.5px;
+    font-weight:600;
+    text-align:left;
+    cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .option-btn:hover, .option-btn:active{
+    background:var(--teal);
+    color:white;
+  }
+  .typing{
+    display:flex;
+    gap:4px;
+    padding:14px 16px;
+    background:white;
+    border:1px solid #eee;
+    border-radius:var(--radius);
+    border-bottom-left-radius:4px;
+    width:fit-content;
+  }
+  .typing span{
+    width:6px;height:6px;border-radius:50%;
+    background:#bbb;
+    animation:bounce 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2){animation-delay:0.15s;}
+  .typing span:nth-child(3){animation-delay:0.3s;}
+  @keyframes bounce{
+    0%,60%,100%{transform:translateY(0);}
+    30%{transform:translateY(-5px);}
+  }
+  .summary-card{
+    background:white;
+    border-radius:22px;
+    padding:24px 20px;
+    margin:10px 4px 30px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.08);
+    animation:fadeIn 0.5s ease both;
+  }
+  .summary-card h2{
+    margin:0 0 4px;
+    font-size:20px;
+    color:var(--teal);
+  }
+  .summary-card .sub{
+    font-size:13px;
+    color:var(--text-muted);
+    margin-bottom:16px;
+  }
+  .summary-list{
+    list-style:none;
+    padding:0;
+    margin:0 0 20px;
+  }
+  .summary-list li{
+    padding:8px 0;
+    font-size:14.5px;
+    border-bottom:1px solid #f2f2f2;
+    display:flex;
+    gap:8px;
+  }
+  .summary-list li:last-child{border-bottom:none;}
+  .summary-list .emoji{flex-shrink:0;}
+  .dest-title{
+    font-size:14px;
+    font-weight:700;
+    color:var(--purple);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    margin:6px 0 10px;
+  }
+  .dest-card{
+    background:var(--teal-light);
+    border-radius:16px;
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .dest-card .name{
+    font-weight:700;
+    font-size:16px;
+    color:#1d6d63;
+    margin-bottom:4px;
+  }
+  .dest-card .hook{
+    font-size:13.5px;
+    color:#3a3a3a;
+    line-height:1.4;
+  }
+  .wa-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:#25D366;
+    color:white;
+    text-decoration:none;
+    font-weight:700;
+    font-size:15px;
+    padding:15px;
+    border-radius:16px;
+    margin-top:8px;
+  }
+  .wa-btn:active{opacity:0.85;}
+  .restart-link{
+    display:block;
+    text-align:center;
+    margin-top:14px;
+    font-size:13px;
+    color:var(--text-muted);
+    text-decoration:underline;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <header>
+    <div class="brand">✈️ KarmicJourneys</div>
+    <div class="title">Find Your Travel Mood</div>
+    <div class="progress-wrap">
+      <div class="progress-label" id="progressLabel">Let's get started</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </header>
+
+  <div class="chat" id="chat"></div>
+</div>
+
+<script>
+/* =========================================================================
+   EDITABLE CONFIG — everything below in this block is safe to tweak
+   without touching the app logic further down.
+   ========================================================================= */
+
+// Where the final "Send my travel profile" button sends the customer.
+// Use full country code + number, no + sign, no spaces.
+const WHATSAPP_NUMBER = "919825756710";
+
+// Stage definitions. Each stage = array of question objects.
+// Each question has: key (used for profile + tagging), text, and options.
+// Options can optionally carry `tags` used for destination matching later.
+const STAGES = [
+  // ---------------- STAGE 1: Travel Mood ----------------
+  {
+    stageLabel: "Stage 1 of 5 · Travel Mood",
+    questions: [
+      {
+        key: "mood",
+        text: "Hey there! 👋 Let's find your perfect trip. First — what's the *mood* you're chasing right now?",
+        options: [
+          { label: "🧘 Unwind & Relax", value: "Unwind & Relax", tags: ["relax"] },
+          { label: "🏛️ Explore & Culture", value: "Explore & Culture", tags: ["culture"] },
+          { label: "🌲 Thrill & Nature", value: "Thrill & Nature", tags: ["thrill", "nature"] },
+          { label: "💞 Romance & Celebration", value: "Romance & Celebration", tags: ["romance"] }
+        ]
+      }
+    ]
+  },
+
+  // ---------------- STAGE 2: Scenery & Climate ----------------
+  // Option ORDER adapts based on Stage 1's mood answer (see reorderByMood()).
+  {
+    stageLabel: "Stage 2 of 5 · Scenery & Climate",
+    questions: [
+      {
+        key: "scenery",
+        text: "Nice pick! Now picture the view outside your window — what pulls you in most?",
+        options: [
+          { label: "🏔️ Misty hills", value: "Misty hills", tags: ["hills", "cool"], moodPriority: ["Thrill & Nature", "Unwind & Relax"] },
+          { label: "🏖️ Sunny beaches", value: "Sunny beaches", tags: ["beach", "sunny"], moodPriority: ["Romance & Celebration", "Unwind & Relax"] },
+          { label: "🐘 Forest & wildlife", value: "Forest & wildlife", tags: ["wildlife", "nature"], moodPriority: ["Thrill & Nature"] },
+          { label: "🕌 Historic towns", value: "Historic towns", tags: ["heritage", "culture"], moodPriority: ["Explore & Culture", "Romance & Celebration"] }
+        ]
+      }
+    ]
+  },
+
+  // ---------------- STAGE 3: Travel Party & Scope ----------------
+  {
+    stageLabel: "Stage 3 of 5 · Who's Coming & How Far",
+    questions: [
+      {
+        key: "party",
+        text: "Love it. Who's this trip with?",
+        options: [
+          { label: "🧍 Solo", value: "Solo" },
+          { label: "💑 Couple", value: "Couple" },
+          { label: "👨‍👩‍👧 Family", value: "Family" },
+          { label: "🧑‍🤝‍🧑 Friends group", value: "Friends group" }
+        ]
+      },
+      {
+        key: "scope",
+        text: "Got it! And are we thinking within India, or stepping out internationally?",
+        options: [
+          { label: "🇮🇳 Domestic (within India)", value: "Domestic", tags: ["domestic"] },
+          { label: "🌍 International", value: "International", tags: ["international"] }
+        ]
+      },
+      {
+        key: "distanceTolerance",
+        text: "Perfect — one more on this: how far are you happy to travel to get there?",
+        options: [
+          { label: "🚗 Short drive (up to ~5 hrs)", value: "Short drive", tags: ["shortdrive"] },
+          { label: "✈️ Domestic flight away", value: "Domestic flight" },
+          { label: "🛫 International flight, no problem", value: "International flight" }
+        ]
+      }
+    ]
+  },
+
+  // ---------------- STAGE 4: Pace & Stay Style ----------------
+  {
+    stageLabel: "Stage 4 of 5 · Pace & Stay Style",
+    questions: [
+      {
+        key: "pace",
+        text: "Great choices so far! Now — slow mornings or packed days?",
+        options: [
+          { label: "🛋️ Slow resort/villa lounging", value: "Slow & relaxed", tags: ["slow"] },
+          { label: "🏃 Fast-paced sightseeing", value: "Fast-paced sightseeing", tags: ["fast"] }
+        ]
+      },
+      {
+        key: "stayStyle",
+        text: "And where do you like to lay your head at night?",
+        options: [
+          { label: "✨ Luxury", value: "Luxury", tags: ["luxury"] },
+          { label: "🎨 Boutique", value: "Boutique", tags: ["boutique"] },
+          { label: "💰 Value", value: "Value", tags: ["value"] }
+        ]
+      }
+    ]
+  },
+
+  // ---------------- STAGE 5: Duration & Budget ----------------
+  {
+    stageLabel: "Stage 5 of 5 · Duration & Budget",
+    questions: [
+      {
+        key: "duration",
+        text: "Almost there! How long is this trip?",
+        options: [
+          { label: "🗓️ Weekend getaway", value: "Weekend" },
+          { label: "📅 4–6 days", value: "4–6 days" },
+          { label: "🗺️ 7+ days", value: "7+ days" }
+        ]
+      },
+      {
+        key: "budget",
+        text: "Last one — what budget tier feels right?",
+        options: [
+          { label: "💰 Value", value: "Value", tags: ["value"] },
+          { label: "⭐ Comfort", value: "Comfort", tags: ["comfort"] },
+          { label: "💎 Luxury", value: "Luxury", tags: ["luxury"] }
+        ]
+      }
+    ]
+  }
+];
+
+// One-line reactions shown briefly after ANY answer, picked at random.
+const REACTIONS = [
+  "Love that! 🙌",
+  "Great choice! ✨",
+  "Ooh, nice! 😍",
+  "Got it — noting that down! 📝",
+  "Perfect, this is coming together! 🌿"
+];
+
+/* -------------------------------------------------------------------------
+   DESTINATION LIBRARY — tagged, not hand-mapped to every combination.
+   Add/remove destinations freely; just keep the tag style consistent.
+   Tag vocabulary used above: relax, culture, thrill, nature, hills, beach,
+   sunny, wildlife, heritage, romance, domestic, international, slow, fast,
+   luxury, boutique, value, comfort
+   ------------------------------------------------------------------------- */
+const DESTINATIONS = [
+  { name: "Kerala Backwaters", hook: "Drift through palm-lined canals on a houseboat, pure slow-mode calm.", tags: ["relax","slow","domestic","beach","nature","comfort","luxury"] },
+  { name: "Munnar & Wayanad, Kerala", hook: "Misty tea hills and forest trails made for unplugging.", tags: ["relax","hills","nature","slow","domestic","value","comfort"] },
+  { name: "Manali & Kasol, Himachal", hook: "Snow peaks, riverside cafés, and adventure just outside your door.", tags: ["thrill","nature","hills","domestic","fast","value","comfort"] },
+  { name: "Rishikesh, Uttarakhand", hook: "Rafting, yoga, and Ganga-side calm in one hill town.", tags: ["thrill","relax","hills","nature","domestic","value"] },
+  { name: "Jim Corbett National Park", hook: "Tiger safaris and jungle lodges for the wildlife-obsessed.", tags: ["thrill","wildlife","nature","domestic","fast","comfort","luxury"] },
+  { name: "Ranthambore, Rajasthan", hook: "Big cats, forts, and golden desert light all in one trip.", tags: ["thrill","wildlife","heritage","culture","domestic","comfort","luxury"] },
+  { name: "Udaipur, Rajasthan", hook: "Lakeside palaces and candlelit dinners built for romance.", tags: ["romance","heritage","culture","domestic","slow","luxury","comfort"] },
+  { name: "Jaipur & Jodhpur, Rajasthan", hook: "Forts, bazaars, and centuries of history to wander through.", tags: ["culture","heritage","domestic","fast","value","comfort"] },
+  { name: "Goa", hook: "Sunny beaches by day, easy nightlife by evening — classic and reliable.", tags: ["relax","romance","beach","sunny","domestic","slow","fast","value","comfort","luxury"] },
+  { name: "Andaman Islands", hook: "Turquoise water, coral reefs, and total castaway calm.", tags: ["relax","romance","beach","sunny","domestic","slow","comfort","luxury"] },
+  { name: "Varanasi, Uttar Pradesh", hook: "Ancient ghats and rituals for a deep culture immersion.", tags: ["culture","heritage","domestic","fast","value"] },
+  { name: "Ladakh", hook: "High-altitude landscapes and monasteries for the adventurous soul.", tags: ["thrill","nature","hills","domestic","fast","value","comfort"] },
+  { name: "Bali, Indonesia", hook: "Rice terraces, beach clubs, and temples — a bit of everything.", tags: ["relax","romance","culture","beach","sunny","heritage","international","slow","comfort","luxury"] },
+  { name: "Maldives", hook: "Overwater villas and impossibly clear water, made for celebration.", tags: ["romance","relax","beach","sunny","international","slow","luxury"] },
+  { name: "Thailand (Phuket/Krabi)", hook: "Island-hopping beaches with a lively, easy-going pace.", tags: ["relax","thrill","beach","sunny","nature","international","fast","value","comfort"] },
+  { name: "Dubai, UAE", hook: "Desert adventure by day, skyline glamour by night.", tags: ["thrill","romance","international","fast","luxury","comfort"] },
+  { name: "Switzerland", hook: "Alpine villages and scenic trains for a slow, scenic escape.", tags: ["relax","romance","hills","nature","international","slow","luxury","comfort"] },
+  { name: "Vietnam (Hanoi/Ha Long Bay)", hook: "Limestone bays and street-food culture, endlessly explorable.", tags: ["culture","thrill","nature","heritage","international","fast","value","comfort"] },
+  { name: "Santorini, Greece", hook: "Whitewashed cliffs and sunset views built for celebrations.", tags: ["romance","beach","sunny","heritage","international","slow","luxury"] },
+  { name: "Bhutan", hook: "Mountain monasteries and quiet trails, off the usual path.", tags: ["culture","relax","hills","nature","heritage","international","slow","value","comfort"] },
+
+  // ---- Additional domestic cities ----
+  { name: "Darjeeling & Gangtok, Sikkim", hook: "Tea gardens and mountain views with a slower, cooler pace.", tags: ["relax","hills","nature","domestic","slow","value","comfort"] },
+  { name: "Coorg, Karnataka", hook: "Coffee estates and waterfalls, an easy hill escape from Bengaluru.", tags: ["relax","hills","nature","domestic","slow","value","comfort"] },
+  { name: "Hampi, Karnataka", hook: "Ancient ruins scattered across boulder hills — history you can climb.", tags: ["culture","heritage","thrill","domestic","fast","value"] },
+  { name: "Amritsar, Punjab", hook: "The Golden Temple and border ceremony for a short, powerful culture trip.", tags: ["culture","heritage","domestic","fast","value"] },
+  { name: "Mumbai & Lonavala, Maharashtra", hook: "City energy paired with easy weekend hill retreats nearby.", tags: ["culture","thrill","hills","domestic","fast","value","comfort"] },
+  { name: "Pondicherry", hook: "French quarters, quiet cafés, and a laid-back beach town feel.", tags: ["relax","culture","beach","heritage","domestic","slow","value","comfort"] },
+  { name: "Spiti Valley, Himachal", hook: "Rugged high-desert landscapes for the truly adventurous.", tags: ["thrill","nature","hills","domestic","fast","value"] },
+  { name: "Shillong & Cherrapunji, Meghalaya", hook: "Living root bridges and waterfalls in India's wettest, greenest corner.", tags: ["nature","thrill","hills","domestic","fast","value","comfort"] },
+  { name: "Mysore, Karnataka", hook: "Palaces and gardens for an easy, elegant short culture break.", tags: ["culture","heritage","domestic","slow","value","comfort"] },
+  { name: "Lakshadweep", hook: "Untouched coral lagoons, quieter and closer than the Andamans.", tags: ["relax","romance","beach","sunny","domestic","slow","comfort","luxury"] },
+
+  // ---- Additional international destinations ----
+  { name: "Singapore", hook: "Slick city sightseeing, easy for first-time international travellers.", tags: ["culture","thrill","international","fast","value","comfort","luxury"] },
+  { name: "Nepal (Kathmandu/Pokhara)", hook: "Himalayan trekking and temples, an easy first international trip.", tags: ["thrill","nature","culture","heritage","hills","international","fast","value"] },
+  { name: "Sri Lanka", hook: "Beaches, tea hills, and ancient ruins packed into one short hop.", tags: ["relax","culture","beach","hills","heritage","international","slow","fast","value","comfort"] },
+  { name: "Malaysia (Kuala Lumpur/Langkawi)", hook: "City skyline by day, island beaches by the weekend.", tags: ["culture","relax","beach","sunny","international","fast","value","comfort"] },
+  { name: "Turkey (Istanbul/Cappadocia)", hook: "Balloon rides over ancient valleys and bazaars full of history.", tags: ["culture","thrill","heritage","international","fast","comfort","luxury"] },
+  { name: "Georgia (Tbilisi)", hook: "Budget-friendly mountains, wine valleys, and old-town charm.", tags: ["culture","nature","hills","heritage","international","slow","value"] },
+  { name: "Kenya (Safari)", hook: "Big-five game drives across the savannah, built for thrill-seekers.", tags: ["thrill","wildlife","nature","international","fast","comfort","luxury"] },
+  { name: "New Zealand", hook: "Fjords, hikes, and adrenaline sports end to end.", tags: ["thrill","nature","hills","international","fast","comfort","luxury"] },
+  { name: "Japan (Tokyo/Kyoto)", hook: "Neon cities and quiet temples, a striking mix of fast and slow.", tags: ["culture","thrill","heritage","international","fast","comfort","luxury"] },
+  { name: "Seychelles", hook: "Secluded beaches and total privacy for a splurge-worthy celebration.", tags: ["romance","relax","beach","sunny","international","slow","luxury"] },
+
+  // ---- Short-drive (Ahmedabad-reachable, ~5 hrs or less) weekend picks ----
+  { name: "Saputara, Gujarat", hook: "Gujarat's only hill station — cool air and lake views, a short hop away.", tags: ["relax","hills","nature","domestic","shortdrive","slow","value","comfort"] },
+  { name: "Diu", hook: "Quiet beaches and Portuguese-era streets, easy weekend reach from Ahmedabad.", tags: ["relax","beach","sunny","heritage","domestic","shortdrive","slow","value","comfort"] },
+  { name: "Mount Abu, Rajasthan", hook: "Rajasthan's lone hill station with lake views and Jain temple carvings.", tags: ["relax","culture","hills","heritage","domestic","shortdrive","slow","value","comfort"] },
+  { name: "Statue of Unity & Kevadia, Gujarat", hook: "Monument sightseeing and riverside views, doable as a quick day-plus trip.", tags: ["culture","thrill","domestic","shortdrive","fast","value","comfort"] },
+  { name: "Champaner-Pavagadh, Gujarat", hook: "Hilltop temple and UNESCO ruins, a compact half-day-plus history fix.", tags: ["culture","heritage","thrill","domestic","shortdrive","fast","value"] }
+];
+
+/* =========================================================================
+   APP LOGIC — no need to edit below this line for content changes
+   ========================================================================= */
+
+const chatEl = document.getElementById("chat");
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
+
+let stageIndex = 0;
+let questionIndexInStage = 0;
+let profile = {}; // key -> {value, tags}
+let totalQuestionsAnswered = 0;
+const totalQuestions = STAGES.reduce((sum, s) => sum + s.questions.length, 0);
+
+function scrollToBottom(){
+  window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"});
+}
+
+function addBotBubble(text, extraClass){
+  const row = document.createElement("div");
+  row.className = "bubble-row bot";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble bot" + (extraClass ? " " + extraClass : "");
+  bubble.textContent = text;
+  row.appendChild(bubble);
+  chatEl.appendChild(row);
+  scrollToBottom();
+}
+
+function addUserBubble(text){
+  const row = document.createElement("div");
+  row.className = "bubble-row user";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble user";
+  bubble.textContent = text;
+  row.appendChild(bubble);
+  chatEl.appendChild(row);
+  scrollToBottom();
+}
+
+function showTyping(){
+  const row = document.createElement("div");
+  row.className = "bubble-row bot";
+  row.id = "typingRow";
+  const typing = document.createElement("div");
+  typing.className = "typing";
+  typing.innerHTML = "<span></span><span></span><span></span>";
+  row.appendChild(typing);
+  chatEl.appendChild(row);
+  scrollToBottom();
+}
+
+function removeTyping(){
+  const row = document.getElementById("typingRow");
+  if(row) row.remove();
+}
+
+function updateProgress(){
+  const pct = Math.round((totalQuestionsAnswered / totalQuestions) * 100);
+  progressFill.style.width = pct + "%";
+  const currentStage = STAGES[stageIndex];
+  progressLabel.textContent = currentStage ? currentStage.stageLabel : "All done!";
+}
+
+// Reorder Stage 2 scenery options based on Stage 1 mood answer
+function getOrderedOptions(question){
+  const mood = profile.mood ? profile.mood.value : null;
+  if(!mood) return question.options;
+  const opts = [...question.options];
+  opts.sort((a,b) => {
+    const aPri = a.moodPriority && a.moodPriority.includes(mood) ? 0 : 1;
+    const bPri = b.moodPriority && b.moodPriority.includes(mood) ? 0 : 1;
+    return aPri - bPri;
+  });
+  return opts;
+}
+
+function renderQuestion(){
+  updateProgress();
+  const stage = STAGES[stageIndex];
+  if(!stage){
+    renderSummary();
+    return;
+  }
+  const question = stage.questions[questionIndexInStage];
+
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addBotBubble(question.text);
+
+    const optsRow = document.createElement("div");
+    optsRow.className = "bubble-row bot";
+    const optsWrap = document.createElement("div");
+    optsWrap.className = "options";
+    optsWrap.style.maxWidth = "85%";
+
+    const orderedOptions = getOrderedOptions(question);
+    orderedOptions.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = opt.label;
+      btn.onclick = () => handleAnswer(question, opt);
+      optsWrap.appendChild(btn);
+    });
+
+    optsRow.appendChild(optsWrap);
+    chatEl.appendChild(optsRow);
+    scrollToBottom();
+  }, 550);
+}
+
+function handleAnswer(question, option){
+  // remove option buttons once chosen
+  const allOptionRows = chatEl.querySelectorAll(".bubble-row.bot .options");
+  allOptionRows.forEach(el => el.closest(".bubble-row").remove());
+
+  addUserBubble(option.label);
+  profile[question.key] = { value: option.value, tags: option.tags || [] };
+  totalQuestionsAnswered++;
+
+  const reaction = REACTIONS[Math.floor(Math.random() * REACTIONS.length)];
+
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addBotBubble(reaction, "reaction");
+
+    setTimeout(() => {
+      questionIndexInStage++;
+      const stage = STAGES[stageIndex];
+      if(questionIndexInStage >= stage.questions.length){
+        stageIndex++;
+        questionIndexInStage = 0;
+      }
+      renderQuestion();
+    }, 500);
+  }, 500);
+}
+
+function scoreDestination(dest){
+  const allTags = Object.values(profile).flatMap(p => p.tags || []);
+  let score = 0;
+  allTags.forEach(tag => {
+    if(dest.tags.includes(tag)) score++;
+  });
+  // domestic/international is a hard filter, not just a scoring tag
+  const scope = profile.scope ? profile.scope.value : null;
+  if(scope === "Domestic" && !dest.tags.includes("domestic")) score -= 100;
+  if(scope === "International" && !dest.tags.includes("international")) score -= 100;
+  return score;
+}
+
+function pickDestinations(){
+  const scored = DESTINATIONS.map(d => ({...d, score: scoreDestination(d)}))
+    .sort((a,b) => b.score - a.score);
+  // pick top 2 that are meaningfully different (avoid picking near-duplicates)
+  const picks = [scored[0]];
+  for(let i = 1; i < scored.length; i++){
+    if(scored[i].name !== picks[0].name){
+      picks.push(scored[i]);
+      break;
+    }
+  }
+  return picks;
+}
+
+function buildWhatsAppMessage(){
+  const lines = [
+    "Hi! I just completed the KarmicJourneys Travel Mood Finder. Here's my profile:",
+    "",
+    `Mood: ${profile.mood?.value || "-"}`,
+    `Scenery: ${profile.scenery?.value || "-"}`,
+    `Travelling as: ${profile.party?.value || "-"}`,
+    `Scope: ${profile.scope?.value || "-"}`,
+    `Distance comfort: ${profile.distanceTolerance?.value || "-"}`,
+    `Pace: ${profile.pace?.value || "-"}`,
+    `Stay style: ${profile.stayStyle?.value || "-"}`,
+    `Duration: ${profile.duration?.value || "-"}`,
+    `Budget: ${profile.budget?.value || "-"}`,
+    "",
+    "Can you suggest some options for me?"
+  ];
+  return encodeURIComponent(lines.join("\n"));
+}
+
+function renderSummary(){
+  progressLabel.textContent = "All done! 🎉";
+  progressFill.style.width = "100%";
+
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addBotBubble("All set! Here's your travel profile ✨");
+
+    const card = document.createElement("div");
+    card.className = "summary-card";
+
+    const destinations = pickDestinations();
+
+    card.innerHTML = `
+      <h2>Your Travel Profile</h2>
+      <div class="sub">Based on everything you told us</div>
+      <ul class="summary-list">
+        <li><span class="emoji">🎯</span> ${profile.mood?.value} trip, drawn to ${profile.scenery?.value?.toLowerCase()}</li>
+        <li><span class="emoji">👥</span> Travelling as ${profile.party?.value?.toLowerCase()} · ${profile.scope?.value}</li>
+        <li><span class="emoji">🛏️</span> ${profile.pace?.value} · ${profile.stayStyle?.value} stays · ${profile.duration?.value}, ${profile.budget?.value} budget</li>
+      </ul>
+      <div class="dest-title">Suggested for you</div>
+      ${destinations.map(d => `
+        <div class="dest-card">
+          <div class="name">${d.name}</div>
+          <div class="hook">${d.hook}</div>
+        </div>
+      `).join("")}
+      <a class="wa-btn" href="https://wa.me/${WHATSAPP_NUMBER}?text=${buildWhatsAppMessage()}" target="_blank">
+        📲 Send my travel profile on WhatsApp
+      </a>
+      <div class="restart-link" onclick="location.reload()">Start over</div>
+    `;
+
+    chatEl.appendChild(card);
+    scrollToBottom();
+  }, 600);
+}
+
+// Kick things off
+renderQuestion();
+</script>
+
+</body>
+</html>
